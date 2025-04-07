@@ -1,166 +1,191 @@
-<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
-<a name="readme-top"></a>
-<!--
-*** Thanks for checking out the Best-README-Template. If you have a suggestion
-*** that would make this better, please fork the repo and create a pull request
-*** or simply open an issue with the tag "enhancement".
-*** Don't forget to give the project a star!
-*** Thanks again! Now go create something AMAZING! :D
--->
+# CTFd Docker Containers Plugin
 
-
-
-<!-- PROJECT SHIELDS -->
-<!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
-
-<!-- PROJECT LOGO -->
-<br />
 <div align="center">
-
   <h3 align="center">CTFd Docker Containers Plugin</h3>
   <p align="center">
-    A plugin that can create containerize challenges for your CTF contest 
-    <br />
+    A plugin to create containerized challenges for your CTF contest.
   </p>
 </div>
 
+## Table of Contents
+1. [Getting Started](#getting-started)
+   - [Prerequisites](#prerequisites)
+   - [Installation](#installation)
+2. [Usage](#usage)
+   - [Using Local Docker Daemon](#using-local-docker-daemon)
+   - [Using Remote Docker via SSH](#using-remote-docker-via-ssh)
+3. [Demo](#demo)
+4. [Roadmap](#roadmap)
+5. [License](#license)
+6. [Contact](#contact)
 
+---
 
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#demo">Demo</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ol>
-</details>
-
-
-<!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+This section provides instructions for setting up the project locally.
 
 ### Prerequisites
 
-To use this plugin you'll need  
-
-- Know how to host CTFd w Docker
-- Know how to use Docker
+To use this plugin, you should have:
+- Experience hosting CTFd with Docker
+- Basic knowledge of Docker
+- SSH access to remote servers (if using remote Docker)
 
 ### Installation
 
-
-1. Map docker socket into CTFd container by modifying the `docker-compose.yml` file:
-   ```docker
-    services:
-      ctfd:
-        ...
-        volumes:
-        ...
-          - /var/run/docker.sock:/var/run/docker.sock
-        ...
+1. **Clone this repository:**
+   ```bash
+   git clone https://github.com/phannhat17/CTFd-Docker-Plugin.git
    ```
-2. Clone this repository
+2. **Rename the folder:**
+   ```bash
+   mv CTFd-Docker-Plugin containers
+   ```
+3. **Move the folder to the CTFd plugins directory:**
+   ```bash
+   mv containers /path/to/CTFd/plugins/
+   ```
 
-3. Rename "CTFd-Docker-Plugin" to "containers"
+[Back to top](#ctfd-docker-containers-plugin)
 
-4. Place `containers` folder inside `CTFd/plugins` directory
+---
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-<!-- USAGE EXAMPLES -->
 ## Usage
 
-1. Connect to Docker daemon:
+### Using Local Docker Daemon
 
-    If the CTFd and the challenges host in the same machine, you just need to go to the plugin settings page `/containers/settings` and fill in everything you need except the `Base URL` field.  
+#### Case A: **CTFd Running Directly on Host:**
+  - Go to the plugin settings page: `/containers/settings`
+  - Fill in all fields except the `Base URL`.
 
-    ![](./image-readme/1.png)
+  ![Settings Example](./image-readme/1.png)
 
-    If you host the CTFd and the challenges in different machines, you need to follow the instructions one that page **I dont think its working XD, I'll try to fix that later**
+#### Case B: **CTFd Running via Docker:**
+  - Map the Docker socket into the CTFd container by modify the `docker-compose.yml` file:
+  ```bash
+  services:
+    ctfd:
+      ...
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+      ...
+  ```
+  - Restart CTFd
+  - Go to the plugin settings page: `/containers/settings`
+  - Fill in all fields except the `Base URL`.
 
-2. Create the challenge:
-    - Select `container` type and fill all the required fields
+### Using Remote Docker via SSH
 
-    ![](./image-readme/2.png)
+For remote Docker, the CTFd host must have SSH access to the remote server.
 
-    - If you want regular scoring for the challenge, set the maximum and minimum values to the same amount and the decay to zero.
+#### Prerequisites:
+- **SSH access** from the CTFd host to the Docker server
+- The remote server's fingerprint should be in the `known_hosts` file
+- SSH key files (`id_rsa`) and an SSH config file should be available
 
-    - In the image field, it allows you to select the docker image already on the machine
+#### Case A: **CTFd Running via Docker**
 
-    ![](./image-readme/3.png)
+1. **Prepare SSH Config:**
+   ```bash
+   mkdir ssh_config
+   cp ~/.ssh/id_rsa ~/.ssh/known_hosts ~/.ssh/config ssh_config/
+   ```
 
-    - In the `Connect type` field, it allows you to choose how to connect to the challenge such as via web or tcp
+2. **Mount SSH Config into the CTFd container:**
+   ```yaml
+   services:
+     ctfd:
+       ...
+       volumes:
+         - ./ssh_config:/root/.ssh:ro
+       ...
+   ```
 
-    ![](./image-readme/4.png)
+3. **Restart CTFd:**
+   ```bash
+   docker-compose down
+   docker-compose up -d
+   ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+#### Case B: **CTFd Running Directly on Host**
+
+1. **Ensure SSH Access:**
+   - Test the connection:
+     ```bash
+     ssh user@remote-server
+     ```
+
+2. **Configure Docker Base URL:**
+   - In the CTFd plugin settings page (`/containers/settings`), set:
+     ```
+     Base URL: ssh://user@remote-server
+     ```
+
+3. **Restart CTFd:**
+   ```bash
+   sudo systemctl restart ctfd
+   ```
+
+[Back to top](#ctfd-docker-containers-plugin)
+
+---
 
 ## Demo
 
-Admin can manage created containers, containers can also be filtered by challenge or player
+### Admin Dashboard
+- Manage running containers
+- Filter by challenge or player
 
-![](./image-readme/manage.png)
+![Manage Containers](./image-readme/manage.png)
 
-**Challenge view**
-Web             |  TCP
-:-------------------------:|:-------------------------:
-![](./image-readme/http.png) |  ![](./image-readme/tcp.png)
+### Challenge View
 
-![](./image-readme/demo.gif)
+**Web Access** | **TCP Access**
+:-------------:|:-------------:
+![Web](./image-readme/http.png) | ![TCP](./image-readme/tcp.png)
 
+### Live Demo
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+![Live Demo](./image-readme/demo.gif)
 
-<!-- ROADMAP -->
+[Back to top](#ctfd-docker-containers-plugin)
+
+---
+
 ## Roadmap
 
-- [x] Make the plugin work in user mode
-- [x] Make the admin dashboard can filter by team/user or challenge
-- [x] Make the plugin work with core-beta theme
+- [x] Support for user mode
+- [x] Admin dashboard with team/user filtering
+- [x] Compatibility with the core-beta theme
+- [x] Monitor share flag 
+- [ ] Monitor detail on share flag 
+- [ ] Prevent container creation on solved challenge
 
+For more features and known issues, check the [open issues](https://github.com/phannhat17/CTFd-Docker-Plugin/issues).
 
-See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
+[Back to top](#ctfd-docker-containers-plugin)
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+---
 
-
-<!-- LICENSE -->
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+Distributed under the MIT License. See `LICENSE.txt` for details.
 
-Actually, this is just an upgrade of [andyjsmith's plugin](https://github.com/andyjsmith/CTFd-Docker-Plugin) that I upgraded by myself. I haven't worked much with the Licenses on github so it might be a violation. If you have anything please contact me by email below, I will respond within 2 days!
+> This plugin is an upgrade of [andyjsmith's plugin](https://github.com/andyjsmith/CTFd-Docker-Plugin) with additional features.
 
-Thanks again [andyjsmith](https://github.com/andyjsmith) for creating this base plugin!
+If there are licensing concerns, please reach out via email (contact below).
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+[Back to top](#ctfd-docker-containers-plugin)
 
+---
 
-<!-- CONTACT -->
 ## Contact
 
-Phan Nhat - @Discord ftpotato - contact@phannhat.id.vn
+**Phan Nhat**  
+- **Discord:** ftpotato  
+- **Email:** contact@phannhat.id.vn  
+- **Project Link:** [CTFd Docker Plugin](https://github.com/phannhat17/CTFd-Docker-Plugin)
 
-Project Link: [https://github.com/phannhat17/CTFd-Docker-Plugin](https://github.com/phannhat17/CTFd-Docker-Plugin)
+[Back to top](#ctfd-docker-containers-plugin)
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>

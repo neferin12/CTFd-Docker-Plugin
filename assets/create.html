@@ -14,8 +14,7 @@
 			Use this to specify a link, hostname, or connection instructions for your challenge.
 		</small>
 	</label>
-	<input type="text" class="form-control chal-connection-info" name="connection_info"
-		value="Container">
+	<input type="text" class="form-control chal-connection-info" name="connection_info" value="Container">
 </div>
 <div class="form-group">
 	<label for="value">Initial Value<br>
@@ -65,7 +64,7 @@
 			Connect via web or tcp
 		</small>
 	</label>
-	<select type="text" class="form-control" name="ctype" placeholder="Connect via" id="connect-type"
+	<select type="text" class="form-control" name="connection_type" placeholder="Connect via" id="connect-type"
 		title="Connect via web or tcp" required>
 		<option value="" selected disabled>Choose a value...</option>
 		<option value="web">Web</option>
@@ -86,16 +85,6 @@
 
 <div class="form-group">
 	<label>
-		Command<br>
-		<small class="form-text text-muted">
-			Command to run in the Docker container
-		</small>
-	</label>
-	<input type="text" class="form-control" name="command" placeholder="Enter command or leave blank">
-</div>
-
-<div class="form-group">
-	<label>
 		Volumes<br>
 		<small class="form-text text-muted">
 			Custom volumes to mount, in JSON. E.g.
@@ -104,6 +93,68 @@
 	</label>
 	<input type="text" class="form-control" name="volumes" placeholder="Enter volumes or leave blank">
 </div>
+<!-- Flag Mode, Prefix, Suffix, and Random Length -->
+<div class="form-group">
+	<label for="flag_mode">Flag Mode<br><small class="form-text text-muted">
+			<ul>
+				<li><strong>Static Mode:</strong>
+					<ul>
+						<li>The flag follows a fixed format:
+							<code>&lt;prefix&gt; + &lt;flag content&gt; + &lt;suffix&gt;</code>
+						</li>
+						<li>Example: If your flag is <code>CTF{this_is_the_flag}</code>, you provide:
+							<ul>
+								<li><strong>Prefix:</strong> <code>CTF{this_is_the_flag</code></li>
+								<li><strong>Suffix:</strong> <code>}</code></li>
+								<li><strong>Random Length:</strong> Leave as default</li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+				<li><strong>Random Mode:</strong>
+					<ul>
+						<li>The flag follows the format:
+							<code>&lt;prefix&gt; + &lt;random part (length defined)&gt; + &lt;suffix&gt;</code>
+						</li>
+						<li>Example 1: If <code>random_length = 8</code>, a flag could be: <code>CTF{a1b2c3d4}</code>
+						</li>
+						<li>Example 2: The random part can be appended to a predefined flag:
+							<code>CTF{this_is_the_flag_a1b2c3d4}</code>
+						</li>
+						<li>You provide:
+							<ul>
+								<li><strong>Prefix:</strong> <code>CTF{</code></li>
+								<li><strong>Suffix:</strong> <code>}</code></li>
+								<li><strong>Random Length:</strong> <code>8</code></li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+			</ul>
+			With this type of challenge, you don't need to specify flag in the popup (just leave empty)!
+		</small>
+	</label>
+	<select class="form-control" id="flag_mode" name="flag_mode">
+		<option value="static">Static</option>
+		<option value="random">Random</option>
+	</select>
+</div>
+
+<div class="form-group">
+	<label for="flag_prefix">Flag Prefix</label>
+	<input type="text" class="form-control" id="flag_prefix" name="flag_prefix" placeholder="CTF{" value="CTF{" />
+</div>
+
+<div class="form-group">
+	<label for="flag_suffix">Flag Suffix</label>
+	<input type="text" class="form-control" id="flag_suffix" name="flag_suffix" placeholder="}" value="}" />
+</div>
+
+<div class="form-group">
+	<label for="random_flag_length">Random Flag Length (Leave as default at static mode)</label>
+	<input type="number" class="form-control" id="random_flag_length" name="random_flag_length" min="1" value="10" />
+</div>
+
 {% endblock %}
 
 {% block type %}
