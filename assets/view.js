@@ -76,15 +76,19 @@ function createChallengeLinkElement(data, parent) {
     expires.textContent = "Expires in " + calculateExpiry(new Date(data.expires)) + " minutes.";
     parent.append(expires, document.createElement('br'));
 
-    if (data.connect == "tcp") {
+    if (data.connect === "tcp") {
         let codeElement = document.createElement('code');
         codeElement.textContent = 'nc ' + data.hostname + " " + data.port;
+        parent.append(codeElement);
+    } else if (data.connect === "ssh") {
+        let codeElement = document.createElement('code');
+        codeElement.textContent = 'ssh [user]@' + data.hostname + " -p" + data.port;
         parent.append(codeElement);
     } else {
         let link = document.createElement('a');
         link.href = 'http://' + data.hostname + ":" + data.port;
         link.textContent = 'http://' + data.hostname + ":" + data.port;
-        link.target = '_blank';
+        link.target = '_blank'
         parent.append(link);
     }
 }
@@ -99,7 +103,7 @@ function view_container_info(challenge_id) {
             "Accept": "application/json",
             "CSRF-Token": init.csrfNonce
         },
-        body: JSON.stringify({ chal_id: challenge_id })
+        body: JSON.stringify({chal_id: challenge_id})
     })
     .then(response => response.json())
     .then(data => {
@@ -134,7 +138,7 @@ function container_request(challenge_id) {
             "Accept": "application/json",
             "CSRF-Token": init.csrfNonce
         },
-        body: JSON.stringify({ chal_id: challenge_id })
+        body: JSON.stringify({chal_id: challenge_id})
     })
     .then(response => response.json())
     .then(data => {
@@ -171,7 +175,7 @@ function container_renew(challenge_id) {
             "Accept": "application/json",
             "CSRF-Token": init.csrfNonce
         },
-        body: JSON.stringify({ chal_id: challenge_id })
+        body: JSON.stringify({chal_id: challenge_id})
     })
     .then(response => response.json())
     .then(data => {
@@ -204,7 +208,7 @@ function container_stop(challenge_id) {
             "Accept": "application/json",
             "CSRF-Token": init.csrfNonce
         },
-        body: JSON.stringify({ chal_id: challenge_id })
+        body: JSON.stringify({chal_id: challenge_id})
     })
     .then(response => response.json())
     .then(data => {
