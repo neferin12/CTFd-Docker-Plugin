@@ -5,7 +5,7 @@ CTFd.plugin.run((_CTFd) => {
 
 var containerImage = document.getElementById("container-image");
 var containerImageDefault = document.getElementById("container-image-default");
-var path = "/containers/api/images";
+var path = "/containers/admin/api/images";
 
 fetch(path, {
     method: "GET",
